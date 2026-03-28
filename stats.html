@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Stats | Flip</title>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-btn" aria-label="Go back to home screen">← Back</a>
+        <h1>My Stats</h1>
+    </header>
+
+    <main class="stats-container">
+
+        <!-- month search -->
+        <div class="month-selector">
+            <button id="prev-month" aria-label="Previous month">&#8249;</button>
+            <h2 id="month-label">All Time</h2>
+            <button id="next-month" aria-label="Next month">&#8250;</button>
+        </div>
+
+        <!-- Quick Numbers -->
+        <section class="quick-stats" aria-label="Quick stats">
+            <article class="stat-box books">
+                <div class="stat-label">BOOKS</div>
+                <span id="total-books">0</span>
+            </article>
+            <article class="stat-box pages">
+                <div class="stat-label">PAGES</div>
+                <span id="total-pages">0</span>
+            </article>
+            <article class="stat-box hours">
+                <div class="stat-label">HOURS</div>
+                <span id="total-hours">0.0</span>
+            </article>
+            <article class="stat-box rating">
+                <div class="stat-label">AVG. RATING</div>
+                <span id="avg-rating">—</span>
+            </article>
+        </section>
+
+        <!-- highest rated ? -->
+        <section class="highest-rated">
+            <h2 class="section-title">Highest Rated Reads</h2>
+            <div class="books-wrapper" id="top-rated-books">
+                <p class="no-books-msg">No books yet — add some!</p>
+            </div>
+        </section>
+
+        <!-- AVERAGES -->
+        <div class="averages-bar">
+            Average book length: <strong id="avg-length">—</strong> &nbsp;|&nbsp;
+            Average time to finish: <strong id="avg-time">—</strong>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3 class="chart-title">Genre Breakdown</h3>
+                <canvas id="genre-chart" height="180"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 class="chart-title">Format Split</h3>
+                <canvas id="format-chart" height="180"></canvas>
+            </div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="chart-full">
+            <h3 class="chart-title">Books Finished Per Month</h3>
+            <canvas id="timeline-chart" height="140"></canvas>
+        </div>
+
+        <!-- THIS IS RATING -->
+        <div class="chart-full">
+            <h3 class="chart-title">Rating Distribution</h3>
+            <canvas id="rating-chart" height="120"></canvas>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+/* color and style variables roots (you can change these to whatever you want just wanted a decent base)
+   css variables are like nicknames for values we use over and over.
+   instead of typing "#3b5bdb" every time we want that blue color, we can
+   just write var(--accent-dark) anywhere in the file.
+   if we ever want to change the main color, we only have to update it here. */
+:root {
+    --bg-main: #f8f9fa;         /* light gray used as the page background */
+    --text-main: #1a202c;       /* very dark navy used for most text */
+    --accent-blue: #748ffc;     /* medium blue used for highlights and active states */
+    --accent-dark: #3b5bdb;     /* deeper blue used for primary buttons and links */
+    --white: #ffffff;
+    --success-green: #4ade80;   /* bright green for positive feedback */
+    --warning-yellow: #fbbf24;  /* yellow for warnings */
+    --danger-red: #f87171;      /* soft red for errors */
+    --border-radius: 16px;      /* how rounded the corners of cards and buttons are */
+    --shadow: 0 4px 6px rgba(0,0,0,0.05);          /* a subtle shadow under most elements */
+    --shadow-modal: 0 10px 25px rgba(0,0,0,0.2);   /* a stronger shadow used on popups */
+}
+
+/* makes every element include padding and borders inside its size measurement.
+   without this, adding padding to a box would make it grow unexpectedly. */
+* {
+    box-sizing: border-box;
+}
+
+/* page body
+   sets the overall look of every page.
+   flexbox + column stacks everything vertically down the middle of the screen. */
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif; /* uses the device's clean system font */
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    margin: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;  /* children stack top to bottom */
+    align-items: center;     /* centers everything horizontally */
+    min-height: 100vh;       /* page is always at least as tall as the screen */
+}
+
+/* page header
+   the header bar at the top of each page.
+   position: relative lets the back button be positioned absolutely inside it. */
+header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;  /* keeps it from stretching too wide on large screens */
+    margin-bottom: 2rem;
+    position: relative;
+    justify-content: center; /* keeps the page title centered */
+    padding: 0 1rem;
+}
+
+/* back button
+   the "← back" link in the top left corner of sub-pages.
+   position: absolute pulls it out of the normal flow and pins it to the far left,
+   while the header title stays centered independently. */
+.back-btn {
+    position: absolute;
+    left: 0;
+    background: none;   /* no background so it looks like a plain link */
+    border: none;
+    color: var(--accent-dark);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s; /* smoothly fades in the hover background */
+    text-decoration: none;             /* removes the default underline from links */
+}
+
+/* adds a light blue background when the user hovers or focuses the back button */
+.back-btn:hover,
+.back-btn:focus {
+    background-color: rgba(59, 91, 219, 0.1);
+}
+
+/* view sections
+   these classes control which section of a page is visible.
+   by default views are hidden, and the "active" class makes one visible. */
+.view {
+    display: none;
+    width: 100%;
+    max-width: 500px;
+    padding: 1rem;
+}
+.view.active {
+    display: block; /* javascript adds this class to show the right section */
+}
+
+/* a utility class for completely hiding any element from the page */
+.hidden {
+    display: none !important; /* !important makes sure nothing else can override this */
+}
+
+/* buttons
+   the default style for every button in the app.
+   all buttons share this base look, then specific classes can customize them. */
+button {
+    background-color: var(--white);
+    color: var(--text-main);
+    border: 2px solid #e2e8f0;     /* light gray border */
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;               /* changes the mouse to a hand icon on hover */
+    transition: all 0.2s ease;     /* smoothly animates any property that changes */
+    box-shadow: var(--shadow);
+    width: 100%;                   /* buttons stretch to fill their container */
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* lifts the button slightly when hovered to give a tactile feel */
+button:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);   /* moves the button 2px upward */
+    box-shadow: 0 6px 8px rgba(0,0,0,0.1);
+}
+
+/* shows a visible outline when someone navigates with a keyboard instead of a mouse.
+   this is important for accessibility so keyboard users can see where they are. */
+button:focus-visible {
+    outline: 3px solid var(--accent-dark);
+    outline-offset: 2px;
+}
+
+/* a filled blue button style used for the main call-to-action buttons */
+.btn-primary {
+    background-color: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-dark); /* darkens slightly on hover */
+}
+
+/* home page menu grid
+   lays out the four main menu buttons in a responsive grid.
+   auto-fit + minmax means the columns adjust automatically based on screen width. */
+.menu-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+/* tab navigation
+   the row of tabs at the top of the my books page (completed / favorites).
+   flex puts them side by side with a small gap. */
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* base style for each individual tab button */
+.tab {
+    flex: 1;                        /* each tab takes up an equal share of the row */
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 0;
+    background-color: #e2e8f0;      /* unselected tabs are gray */
+    border-color: #cbd5e1;
+    cursor: pointer;
+}
+
+/* the currently selected tab turns blue */
+.tab.active {
+    background-color: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+}
+
+.tab:hover {
+    background-color: #cbd5e1; /* slightly darkens on hover */
+}
+
+/* book section
+   each tab has a matching section of book cards.
+   only the section with the "active" class is shown at a time. */
+.book-section {
+    display: none;
+}
+.book-section.active {
+    display: block;
+}
+
+/* book cards
+   each book in the list is displayed in a white card with a subtle shadow. */
+.book-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+}
+
+/* lifts the card slightly when the user hovers over it */
+.book-item:hover {
+    transform: translateY(-2px);
+}
+
+.book-item h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+/* the smaller gray text lines inside each book card (author, genre, etc.) */
+.book-item p {
+    margin: 0.25rem 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.book-rating {
+    margin-top: 0.5rem;
+}
+
+/* star rating widget
+   the row of clickable star emojis used on the add/edit forms. */
+.star-rating {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0.5rem 0;
+}
+
+/* each individual star icon */
+.star {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* makes the star grow slightly when hovered so users know it's clickable */
+.star:hover {
+    transform: scale(1.2);
+}
+
+/* dialog / popup modal
+   styles the popup windows (for adding goals, editing books, etc.).
+   fixed + translate centers it exactly in the middle of the screen. */
+dialog {
+    border: none;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-modal);
+    width: 90%;
+    max-width: 400px;
+    position: fixed;               /* stays in place even if the page is scrolled */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* shifts it left and up by half its own size to center it */
+    z-index: 1000;                 /* makes sure the dialog appears on top of everything else */
+}
+
+/* the dark blurred overlay that appears behind the dialog */
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px); /* blurs the content behind the modal */
+}
+
+/* the inner content area of the dialog uses flex column to stack its children */
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.dialog-content h2 {
+    margin-top: 0; /* removes extra space above the dialog title */
+}
+
+/* input fields inside dialogs */
+.dialog-content input {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* blue outline appears when the user clicks into an input field */
+.dialog-content input:focus {
+    outline: 3px solid var(--accent-dark);
+    outline-offset: 2px;
+}
+
+.dialog-content label {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+/* dialog buttons have a little extra space above them */
+.dialog-content button {
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+/* the cancel/close button in dialogs uses a light gray style instead of blue */
+.btn-close {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #4a5568;
+}
+
+.btn-close:hover {
+    background-color: #e2e8f0;
+}
+
+/* add book forms 
+   styles the text/number/date input fields on the add-audio and add-physical pages.
+   display: block + width: 100% makes each field fill the whole line. */
+form input[type="text"],
+form input[type="number"],
+form input[type="date"] {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    font-family: inherit; /* uses the same font as the rest of the page instead of the browser default */
+}
+
+form input:focus {
+    outline: 3px solid var(--accent-dark);
+    outline-offset: 2px;
+}
+
+form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* goals page
+   the main wrapper on the goals page. flex column stacks everything vertically. */
+.goals-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* each individual goal card */
+.goal-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.goal-item h3 {
+    margin: 0 0 0.25rem 0;
+}
+
+.goal-item p {
+    margin: 0.25rem 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+/* goal progress bar 
+   the gray track that holds the colored fill bar.
+   overflow: hidden clips the fill bar so it doesn't spill outside the rounded edges. */
+.goal-progress-bar {
+    height: 12px;
+    background-color: #e2e8f0; /* gray track */
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+/* the blue fill inside the progress bar.
+   its width is set dynamically by javascript based on the goal's progress percentage. */
+.goal-progress-fill {
+    height: 100%;
+    background-color: var(--accent-blue);
+    transition: width 0.3s ease; /* smoothly animates when the width changes */
+}
+
+/* the row below the progress bar showing the percentage and the edit button.
+   space-between pushes the percentage to the left and the button to the right. */
+.goal-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+/* the edit button inside a goal card is smaller than a normal full-width button */
+.goal-stats button {
+    width: auto;           /* overrides the default 100% width */
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* accessibility helper 
+   visually hides an element but keeps it readable by screen readers.
+   useful for labels or descriptions that sighted users don't need to see. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/*  responsive layout 
+   these styles only apply when the screen is 480px wide or smaller (mobile phones).
+   they override some of the desktop styles to fit smaller screens better. */
+@media (max-width: 480px) {
+    body { padding: 0.5rem; }          /* less padding on small screens */
+    #app-title { font-size: 2rem; }    /* slightly smaller title on mobile */
+    .menu-grid { grid-template-columns: 1fr; } /* menu buttons stack in a single column */
+}
+
+
+
+
+
+/* 
+   stats page styles
+   all of the classes below are only used on stats.html !!!!
+   */
+
+
+
+
+
+/* the main wrapper on the stats page, centered with a max width */
+.stats-container {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 0 0 3rem; /* extra bottom padding so content doesn't sit right at the edge */
+    width: 100%;
+}
+
+/* month navigation 
+   the row with the left/right arrows and the month label between them.
+   flex + center keeps everything lined up horizontally in the middle. */
+.month-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* the small circular arrow buttons on either side of the month label */
+.month-selector button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;  /* makes the button a perfect circle */
+    padding: 0;
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: var(--accent-dark);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+/* flips to a filled blue circle when hovered */
+.month-selector button:hover {
+    background: var(--accent-dark);
+    color: white;
+    border-color: var(--accent-dark);
+    transform: none;  /* overrides the default button lift so it doesn't move */
+    box-shadow: none;
+}
+
+/* the text in the middle showing the current month or "all time" */
+.month-selector h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    min-width: 180px;   /* keeps the layout stable when the text length changes */
+    text-align: center;
+}
+
+/*  quick stats strip 
+   the four colored boxes at the top of the stats page (books, pages, hours, rating).
+   four equal columns side by side. */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+/* base style for each colored stat box */
+.stat-box {
+    border-radius: 14px;
+    padding: 14px 8px 10px;
+    text-align: center;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* each box gets its own background color */
+.stat-box.books  { background: #3b5bdb; }                   /* blue */
+.stat-box.pages  { background: #4ade80; color: #1a5c35; }   /* green with dark green text for contrast */
+.stat-box.hours  { background: #f59e0b; color: #7c3700; }   /* orange with dark text */
+.stat-box.rating { background: #ec4899; }                   /* pink */
+
+/* the small all-caps label above the number (e.g. "BOOKS") */
+.stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.06em; /* spreads the letters apart slightly for a label look */
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 2px;
+}
+
+/* the big number displayed inside each stat box */
+.stat-box span {
+    display: block;
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+/*  highest rated section 
+   the white card containing the row of top-rated book spines. */
+.highest-rated {
+    background: white;
+    border-radius: 18px;
+    padding: 1.25rem 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* the "highest rated reads" heading */
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 1rem;
+}
+
+/* the horizontal scrollable row that holds the book spine cards */
+.books-wrapper {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;   /* lets the row scroll sideways if there are many books */
+    padding-bottom: 6px;
+}
+
+/* each individual book spine + rating badge stacked vertically */
+.book-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 110px; /* prevents books from squishing too small */
+}
+
+/* the colored rectangle that looks like the side of a book on a shelf.
+   border-left acts as the spine shadow to give it a 3d book effect. */
+.book-shape {
+    width: 100px;
+    height: 145px;
+    border-radius: 3px 10px 10px 3px; /* slightly rounded on the right, flat on the left (spine side) */
+    border-left: 10px solid rgba(0,0,0,0.18); /* darker strip on the left edge mimics a book spine */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.12);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+    word-break: break-word; /* allows long titles to wrap inside the shape */
+    line-height: 1.3;
+}
+
+/* each of the five possible book colors uses a gradient for a richer look */
+.book-1 { background: linear-gradient(135deg, #3f51b5, #5c6bc0); } /* indigo */
+.book-2 { background: linear-gradient(135deg, #9c27b0, #ab47bc); } /* purple */
+.book-3 { background: linear-gradient(135deg, #009688, #26a69a); } /* teal */
+.book-4 { background: linear-gradient(135deg, #e91e63, #f06292); } /* pink */
+.book-5 { background: linear-gradient(135deg, #ff5722, #ff8a65); } /* orange */
+
+/* the small pill-shaped badge below each book showing its rating (e.g. "5.0 ⭐") */
+.book-rating-badge {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    padding: 3px 10px;
+    border-radius: 20px; /* fully rounded pill shape */
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    color: var(--text-main);
+}
+
+/* the message shown when there are no books to display in a section */
+.no-books-msg {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/*  averages bar 
+   the white pill below the book spines showing average length and average finish time. */
+.averages-bar {
+    background: white;
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a5568;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* the actual numbers inside the averages bar are darker and bolder */
+.averages-bar strong {
+    color: var(--text-main);
+}
+
+/*  chart grid 
+   two charts side by side (genre breakdown and format split).
+   on small screens these switch to a single column via the media query below. */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* a white card that wraps each chart in the grid */
+.chart-container {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* the small heading above each chart */
+.chart-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 12px;
+}
+
+/* keeps chart canvases from overflowing their container on small screens */
+.chart-container canvas {
+    max-width: 100%;
+}
+
+/* a full-width chart card used for the timeline and rating distribution charts */
+.chart-full {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 12px;
+}
+
+.chart-full canvas {
+    max-width: 100%;
+}
+
+/* on very small screens, stack the two side-by-side charts into a single column */
+@media (max-width: 400px) {
+    .quick-stats { grid-template-columns: repeat(2, 1fr); } /* 2 stat boxes per row instead of 4 */
+    .charts-grid { grid-template-columns: 1fr; }            /* charts stack vertically */
+}

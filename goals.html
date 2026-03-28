@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip | Goals</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-btn" aria-label="Go back">← Back</a>
+        <h1>My Goals</h1>
+    </header>
+
+    <main>
+        <div class="goals-container">
+            <h2>Reading Goals</h2>
+
+            <div id="active-goals">
+                <h3>Working On</h3>
+                <div id="active-list"></div>
+            </div>
+
+            <div id="completed-goals">
+                <h3>Completed</h3>
+                <div id="completed-list"></div>
+            </div>
+
+            <button id="btn-new-goal" class="btn-primary" onclick="document.getElementById('dialog-new-goal').showModal()">Start New Goal</button>
+        </div>
+    </main>
+
+    <dialog id="dialog-new-goal">
+        <div class="dialog-content">
+            <h2 id="goal-dialog-title">Start a New Goal</h2>
+            <form id="goal-form">
+                <input type="text" id="goal-name" placeholder="Goal Name" required>
+                <input type="number" id="goal-target" placeholder="Target Number" min="1" required>
+                <input type="number" id="goal-current" placeholder="Current Progress" min="0" required>
+                <input type="hidden" id="goal-id">
+                <button type="submit" id="goal-submit-btn">Save Goal</button>
+                <button type="button" class="btn-close" onclick="closeDialog('dialog-new-goal')">Cancel</button>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="script.js"></script>
+</body>
+</html>

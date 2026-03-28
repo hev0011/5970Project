@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip | Add Audio Book</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-btn" aria-label="Go back">← Back</a>
+        <h1>Add Audio Book</h1>
+    </header>
+
+    <main>
+        <form id="audio-book-form">
+            <input type="text" id="audio-title" placeholder="Title" required>
+            <input type="text" id="audio-author" placeholder="Author" required>
+            <input type="text" id="audio-length" placeholder="Length (hours:min)" required>
+            <input type="date" id="audio-date" required>
+            <label for="audio-rating">Rating:</label>
+            <div class="star-rating">
+                <span class="star" data-value="1">⭐</span>
+                <span class="star" data-value="2">⭐</span>
+                <span class="star" data-value="3">⭐</span>
+                <span class="star" data-value="4">⭐</span>
+                <span class="star" data-value="5">⭐</span>
+            </div>
+            <input type="hidden" id="audio-rating-value" value="0">
+            <input type="text" id="audio-genre" placeholder="Genre (Optional)">
+            <button type="submit">Save</button>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

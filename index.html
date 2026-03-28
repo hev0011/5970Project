@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip | Reading Tracker</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1 id="app-title">Flip</h1>
+    </header>
+
+    <main>
+        <section id="view-home" class="view active" aria-labelledby="app-title">
+            <nav aria-label="Main Navigation">
+                <div class="menu-grid">
+                    <a href="goals.html"><button>🎯 My Goals</button></a>
+                    <button onclick="document.getElementById('dialog-add-type').showModal()">➕ Add a Book</button>
+                    <a href="my-books.html"><button>📚 My Books</button></a>
+                    <a href="stats.html"><button>📊 My Stats</button></a>
+                </div>
+            </nav>
+        </section>
+    </main>
+
+    <dialog id="dialog-add-type" aria-labelledby="dialog-title">
+        <div class="dialog-content">
+            <h2 id="dialog-title">What did you read?</h2>
+            <a href="add-audio.html"><button id="btn-audio-form">🎧 Audio Book</button></a>
+            <a href="add-physical.html"><button id="btn-physical-form">📖 Physical Book</button></a>
+            <button class="btn-close" aria-label="Close dialog" onclick="document.getElementById('dialog-add-type').close()">Cancel</button>
+        </div>
+    </dialog>
+
+    <script src="script.js"></script>
+</body>
+</html>

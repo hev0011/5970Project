@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip | My Books</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-btn" aria-label="Go back">← Back</a>
+        <h1>My Books</h1>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <button class="tab active" data-tab="completed">Completed</button>
+            <button class="tab" data-tab="favorites">Favorites ⭐</button>
+        </div>
+
+        <div id="book-list">
+            <div id="completed-books" class="book-section active"></div>
+            <div id="favorite-books" class="book-section"></div>
+        </div>
+    </main>
+
+    <dialog id="dialog-edit-book">
+        <div class="dialog-content">
+            <h2>Edit Book</h2>
+            <form id="edit-book-form">
+                <input type="text" id="edit-title" placeholder="Title" required>
+                <input type="text" id="edit-author" placeholder="Author" required>
+                <input type="text" id="edit-length" placeholder="Length/Number of Pages" required>
+                <input type="date" id="edit-date" required>
+                <label for="edit-rating">Rating:</label>
+                <div class="star-rating">
+                    <span class="star" data-value="1">⭐</span>
+                    <span class="star" data-value="2">⭐</span>
+                    <span class="star" data-value="3">⭐</span>
+                    <span class="star" data-value="4">⭐</span>
+                    <span class="star" data-value="5">⭐</span>
+                </div>
+                <input type="hidden" id="edit-rating-value" value="0">
+                <input type="text" id="edit-genre" placeholder="Genre (Optional)">
+                <input type="hidden" id="edit-book-id">
+                <button type="submit">Update</button>
+                <button type="button" class="btn-close" onclick="closeDialog('dialog-edit-book')">Cancel</button>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="script.js"></script>
+</body>
+</html>
