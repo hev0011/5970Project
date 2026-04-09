@@ -319,6 +319,8 @@ function renderFavoriteBooks() {
     container.innerHTML = '';
 
     // filter to only keep 5-star books, then sort newest first
+
+    //LOOK OVER THE FAVORITES (NOT WORKING)
     const favoriteBooks = books
         .filter(book => book.rating === 5)
         .sort((a, b) => new Date(b.dateFinished) - new Date(a.dateFinished));
@@ -357,7 +359,7 @@ function openEditBook(bookId) {
     // update the star visuals to match the book's saved rating
     const stars = document.querySelectorAll('#edit-book-form .star');
     stars.forEach((star, index) => {
-        star.textContent = index < book.rating ? '⭐' : '☆';
+        star.textContent = index < book.rating ? '★' : '☆' | '⯪';
     });
 
     document.getElementById('dialog-edit-book').showModal();
