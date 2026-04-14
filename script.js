@@ -10,6 +10,7 @@ let goals = JSON.parse(localStorage.getItem('goals')) || [];
 function saveData() {
     localStorage.setItem('books', JSON.stringify(books));
     localStorage.setItem('goals', JSON.stringify(goals));
+    localStorage.setItem('toBeRead',JSON.stringify(toBeRead));
 }
 
 // -- router -----------------------------------------------------------------------
@@ -741,3 +742,29 @@ function renderRatingChart(filtered) {
         }
     });
 }
+// -- sign up page -------------------------------------------------------------------
+// where the profile information collected from the form is placed, creating a profile
+document.getElementById("signupForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    let name = document.getElementById("name").value;
+    let age = document.getElementById("age").value;
+    let aboutMe = document.getElementById("aboutMe").value;
+
+    // Create user profile object
+    let userProfile = {
+        name: name,
+        age: age,
+        aboutMe: aboutMe
+    };
+
+    // Save to localStorage
+    localStorage.setItem("userProfile", JSON.stringify(userProfile));
+
+    document.getElementById("message").textContent = "Profile created successfully!";
+});
+// I don't know how right this is! will need to test - CJ 
+// -- To Be Read page -------------------------------------------------------------------
+let toBeRead = JSON.parse(localStorage.getItem('toBeRead'))||[];
+
+
