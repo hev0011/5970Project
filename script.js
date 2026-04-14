@@ -10,6 +10,7 @@ let goals = JSON.parse(localStorage.getItem('goals')) || [];
 function saveData() {
     localStorage.setItem('books', JSON.stringify(books));
     localStorage.setItem('goals', JSON.stringify(goals));
+    localStorage.setItem('toBeRead',JSON.stringify(toBeRead));
 }
 
 // -- router -----------------------------------------------------------------------
@@ -763,4 +764,7 @@ document.getElementById("signupForm").addEventListener("submit", function(event)
     document.getElementById("message").textContent = "Profile created successfully!";
 });
 // I don't know how right this is! will need to test - CJ 
+// -- To Be Read page -------------------------------------------------------------------
+let toBeRead = JSON.parse(localStorage.getItem('toBeRead'))||[];
+
 

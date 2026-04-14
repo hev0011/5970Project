@@ -10,17 +10,25 @@
 
 <body>
 <header>
-    <h1>To Be Read List</h1>
     <a href="index.html" class="back-btn" aria-label="Go back">← Back</a>
+    <h1>To Be Read List</h1>
 </header>
+<main>
+    <div class="tabs"> 
+        <div id="tbrTitle"> </div>
+        <div id="tbrAuthor"> </div>
+    </div>
+</main>
 <!--form to add a book to TBR list-->
-<form>
+<form id="to-be-read">
     <label>Title</label>
     <input type = "text" id="tbrTitle" required>
     <label>Author</label>
     <input type = "text" id="tbrAuthor" required>
-     <button type="submit">Done</button>
+    <button type="submit">Done</button>
 </form>
+<scipt src="script.js"></scipt>
 </body>
+
 <!--Need to make it to where you can see the books from the list, and make "add to list"
 its own seperate thing, kinda like add a book.-->
