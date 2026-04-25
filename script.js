@@ -111,26 +111,34 @@ function initializeHomePage() {
 
 // -- goals page -------------------------------------------------------------------
 // sets up everything the goals page needs when it loads
-function initializeGoalsPage() {
+
+   function initializeGoalsPage() {
     setupStarRatings();
-    renderGoals(); // draw any goals that are already saved
+    renderGoals();
 
-    // listen for the goal form being submitted (when user clicks "save goal")
     document.getElementById('goal-form').addEventListener('submit', function (e) {
-        e.preventDefault(); // stop the page from refreshing on form submit
+        e.preventDefault();
 
-        // read all the values the user typed into the form
         const goalId = document.getElementById('goal-id').value;
         const goalName = document.getElementById('goal-name').value;
         const goalTarget = parseInt(document.getElementById('goal-target').value);
         const goalCurrent = parseInt(document.getElementById('goal-current').value);
 
+        // Validate inputs
+        if (isNaN(goalTarget) || goalTarget < 0 || goalTarget > 1000) {
+            alert('Goal target must be between 0 and 1000.');
+            return;
+        }
+
+        if (isNaN(goalCurrent) || goalCurrent < 0 || goalCurrent > goalTarget) {
+            alert(`Current progress must be between 0 and the goal target (${goalTarget}).`);
+            return;
+        }
+
         if (goalId) {
-            // if goalId has a value, we're editing an existing goal (not making a new one)
+            // Editing existing goal
             const goalIndex = goals.findIndex(g => g.id == goalId);
             if (goalIndex !== -1) {
-                // spread operator (...) copies all existing goal properties,
-                // then we overwrite just the ones the user changed
                 goals[goalIndex] = {
                     ...goals[goalIndex],
                     name: goalName,
@@ -139,21 +147,29 @@ function initializeGoalsPage() {
                 };
             }
         } else {
-            // goalId is empty, so this is a brand new goal
+            // Adding new goal (goalId is empty)
             goals.push({
-                id: Date.now(), // Date.now() gives a unique number based on the current time
+                id: Date.now(),
                 name: goalName,
                 target: goalTarget,
                 current: goalCurrent,
-                createdAt: new Date().toISOString() // saves when the goal was created
+                createdAt: new Date().toISOString()
             });
         }
 
         saveData();
         closeDialog('dialog-new-goal');
-        resetGoalForm(); // clear the form fields so they're blank for next time
-        renderGoals();   // redraw the goals list with the new/updated goal
+        resetGoalForm();
+        renderGoals();
     });
+}
+// Delete a goal by ID
+function deleteGoal(goalId) {
+    if (confirm('Are you sure you want to delete this goal?')) {
+        goals = goals.filter(g => g.id !== goalId);
+        saveData();
+        renderGoals();
+    }
 }
 
 // draws all goals on the page, splitting them into "active" and "completed"
@@ -185,6 +201,7 @@ function renderGoals() {
             <div class="goal-stats">
                 <span>${Math.round(progress)}%</span>
                 <button onclick="editGoal(${goal.id})">Edit</button>
+                <button onclick="deleteGoal(${goal.id})">Delete</button>
             </div>
         `;
 
@@ -320,6 +337,8 @@ function renderFavoriteBooks() {
     container.innerHTML = '';
 
     // filter to only keep 5-star books, then sort newest first
+
+    //LOOK OVER THE FAVORITES (NOT WORKING)
     const favoriteBooks = books
         .filter(book => book.rating === 5)
         .sort((a, b) => new Date(b.dateFinished) - new Date(a.dateFinished));
@@ -358,7 +377,7 @@ function openEditBook(bookId) {
     // update the star visuals to match the book's saved rating
     const stars = document.querySelectorAll('#edit-book-form .star');
     stars.forEach((star, index) => {
-        star.textContent = index < book.rating ? '⭐' : '☆';
+        star.textContent = index < book.rating ? '★' : '☆' | '⯪';
     });
 
     document.getElementById('dialog-edit-book').showModal();
