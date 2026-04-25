@@ -1,53 +1,44 @@
-<!-- use bootsrap :( ( do the mobile approaches in this relook over the templates) -->
- <!-- profile page add in (name (make sure to put on places to congrulate), image, description) (show completed goals)-->
-  <!-- a game related to book/voculary -->
-   <!-- to be read book page -->
-
-<!--index.html-->
-
+<-- index.html --!>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flip | Reading Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
-
-
-
-    <!-- put in the buttons with this ???? -->
-    <link href="bootstrap.css" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <h1 id="app-title">Flip</h1>
+<body class="bg-light">
+    <header class="position-relative w-100 mb-4 d-flex justify-content-center align-items-center mt-3" style="max-width: 500px; padding: 0 1rem;">
+        <h1 id="app-title" class="m-0 text-dark fw-bold">Flip</h1>
     </header>
 
-    <main>
-        <h2>Welcome to Our Book Log Website</h2>
-        <section id="view-home" class="view active" aria-labelledby="app-title">
+    <main class="container" style="max-width: 500px;">
+        <h2 class="text-center h4 mb-4 text-secondary">Welcome to Our Book Log</h2>
+        <section id="view-home" class="view active w-100" aria-labelledby="app-title">
             <nav aria-label="Main Navigation">
-                <div class="menu-grid">
-                    <a href="sign-up-page.html"><button>👤 Make My Profile</button></a><!--added this (CJ)-->
-                    <a href="goals.html"><button>🎯 My Goals</button></a> 
-                    <button onclick="document.getElementById('dialog-add-type').showModal()">➕ Add a Book</button>
-                    <a href="my-books.html"><button>📚 My Books</button></a>
-                    <a href="stats.html"><button>📊 My Stats</button></a>
-                    <a href="to-be-read.html"><button>📝 My TBR List</button></a> <!--added this (CJ)-->
+                <div class="d-flex flex-column gap-3">
+                    <a href="sign-up-page.html" class="text-decoration-none"><button class="btn btn-outline-dark w-100 py-3 shadow-sm fw-bold">👤 Make My Profile</button></a>
+                    <a href="goals.html" class="text-decoration-none"><button class="btn btn-outline-dark w-100 py-3 shadow-sm fw-bold">🎯 My Goals</button></a> 
+                    <button class="btn btn-primary w-100 py-3 shadow-sm fw-bold" onclick="document.getElementById('dialog-add-type').showModal()">➕ Add a Book</button>
+                    <a href="my-books.html" class="text-decoration-none"><button class="btn btn-outline-dark w-100 py-3 shadow-sm fw-bold">📚 My Books</button></a>
+                    <a href="stats.html" class="text-decoration-none"><button class="btn btn-outline-dark w-100 py-3 shadow-sm fw-bold">📊 My Stats</button></a>
+                    <a href="to-be-read.html" class="text-decoration-none"><button class="btn btn-outline-dark w-100 py-3 shadow-sm fw-bold">📝 My TBR List</button></a>
                 </div>
             </nav>
         </section>
     </main>
 
-    <dialog id="dialog-add-type" aria-labelledby="dialog-title">
-        <div class="dialog-content">
-            <h2 id="dialog-title">What did you read?</h2>
-            <a href="add-audio.html"><button id="btn-audio-form">🎧 Audio Book</button></a>
-            <a href="add-physical.html"><button id="btn-physical-form">📖 Physical Book</button></a>
-            <button class="btn-close" aria-label="Close dialog" onclick="document.getElementById('dialog-add-type').close()">Cancel</button>
+    <dialog id="dialog-add-type" class="border-0 rounded-4 shadow-lg p-4" style="max-width: 400px; width: 90%;">
+        <div class="dialog-content d-flex flex-column gap-2 text-center">
+            <h2 id="dialog-title" class="h4 mb-3 fw-bold">What did you read?</h2>
+            <a href="add-audio.html" class="text-decoration-none"><button id="btn-audio-form" class="btn btn-outline-primary w-100 mb-2 py-2">🎧 Audio Book</button></a>
+            <a href="add-physical.html" class="text-decoration-none"><button id="btn-physical-form" class="btn btn-outline-primary w-100 mb-3 py-2">📖 Physical Book</button></a>
+            <button class="btn btn-light w-100 text-muted" aria-label="Close dialog" onclick="document.getElementById('dialog-add-type').close()">Cancel</button>
         </div>
     </dialog>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

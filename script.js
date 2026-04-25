@@ -1,30 +1,26 @@
-// -- shared data ------------------------------------------------------------------
-// when the app loads, we check if there are already books or goals saved
-// in the browser's memory (localStorage). if nothing is there, we start
-// with empty lists so the app doesn't crash
+// shared data variables
+// we check the browser's local storage for existing data, or start with empty arrays if there is none
 let books = JSON.parse(localStorage.getItem('books')) || [];
 let goals = JSON.parse(localStorage.getItem('goals')) || [];
+let toBeRead = JSON.parse(localStorage.getItem('toBeRead')) || [];
 
-// this function saves both lists to the browser's memory any time something changes
-// JSON.stringify turns our javascript list into text so the browser can store it
+// helper function to save all our arrays back into the browser's local storage
 function saveData() {
     localStorage.setItem('books', JSON.stringify(books));
     localStorage.setItem('goals', JSON.stringify(goals));
-    localStorage.setItem('toBeRead',JSON.stringify(toBeRead));
+    localStorage.setItem('toBeRead', JSON.stringify(toBeRead));
 }
 
-// -- router -----------------------------------------------------------------------
-// this runs once the whole html page has finished loading
-// it looks at the url to figure out which page we're on, then calls
-// the right setup function for that page
+// router setup
+// this listens for the web page to finish loading before running any js
 document.addEventListener('DOMContentLoaded', function () {
-    // grab the last part of the url, like "goals.html" or "stats.html"
+    // grab the name of the current html file from the url (like 'index.html' or 'stats.html')
     const path = window.location.pathname.split('/').pop();
 
-    // compare the page name and run the matching setup function
+    // a switch statement to run different setup functions depending on which page we are currently on
     switch (path) {
         case 'index.html':
-        case '': // empty string means we're at the root, same as index.html
+        case '':
             initializeHomePage();
             break;
         case 'goals.html':
@@ -42,170 +38,191 @@ document.addEventListener('DOMContentLoaded', function () {
         case 'stats.html':
             initializeStatsPage();
             break;
+        case 'sign-up-page.html':
+            initializeSignUpPage();
+            break;
+        case 'to-be-read.html':
+            initializeTBRPage();
+            break;
     }
 });
 
-// -- shared helpers ---------------------------------------------------------------
-// these are small utility functions used by multiple pages
-
-// finds a dialog (popup) by its id and closes it
+// shared helpers used across multiple pages
+// closes a native html dialog box by its id
 function closeDialog(dialogId) {
     document.getElementById(dialogId)?.close();
 }
 
-// takes a date string like "2024-03-15" and turns it into something
-// more readable like "Mar 15, 2024"
+// formats a standard date string into a nice readable format (like 'oct 24, 2026')
 function formatDate(dateString) {
+    if (!dateString) return 'unknown date';
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    // adding a midday time fixes a bug where timezones shift the date back by one day
+    const date = new Date(dateString + 'T12:00:00'); 
+    return date.toLocaleDateString(undefined, options);
 }
 
-// builds a string of star emojis based on a number rating
-// for example, a rating of 3 returns "⭐⭐⭐☆☆"
+// generates a visual string of stars based on a number rating
 function generateStars(rating) {
     let stars = '';
+    // loop 5 times, adding a solid star if it is under the rating, or a hollow star if it is over
     for (let i = 0; i < 5; i++) {
-        // if this star's position is less than the rating, fill it in
-        stars += i < rating ? '⭐' : '☆';
+        stars += i < rating ? '★' : '☆';
     }
     return stars;
 }
 
-// finds all the star rating widgets on the page and makes them clickable
-// when a user clicks a star, it saves the value and updates the visual display
+// makes the star rating widgets clickable on the add and edit forms
 function setupStarRatings() {
-    // get every star rating group on the current page
+    // find all the star rating containers on the page
     const starContainers = document.querySelectorAll('.star-rating');
 
     starContainers.forEach(container => {
         const stars = container.querySelectorAll('.star');
-        // the hidden input is what actually stores the number value (1-5)
+        // find the hidden input field right next to the stars so we can save the actual number value
         const hiddenInput = container.parentElement.querySelector('input[type="hidden"]');
 
-        // if there's no hidden input to save to, skip this container
         if (!hiddenInput) return;
 
+        // add a click event to every single star
         stars.forEach(star => {
             star.addEventListener('click', function () {
-                // read the data-value attribute on the clicked star (1, 2, 3, 4, or 5)
+                // get the value of the star that was clicked (1 to 5)
                 const value = parseInt(this.getAttribute('data-value'));
-
-                // save that number in the hidden input so forms can read it
+                // save that value into the hidden input so the form can read it later
                 hiddenInput.value = value;
 
-                // loop through all stars and update their look
-                // stars up to and including the clicked one get filled in
+                // visually update all the stars in this container to reflect the new rating
                 stars.forEach((s, index) => {
-                    s.textContent = index < value ? '⭐' : '☆';
+                    if (index + 1 <= Math.floor(value)) {
+                        s.textContent = '★'; // solid star for rated
+                    } else if (index < value) {
+                        s.textContent = '⯪'; // half star (if we ever use decimals)
+                    } else {
+                        s.textContent = '☆'; // empty star for unrated
+                    }
                 });
             });
         });
     });
 }
 
-// -- home page --------------------------------------------------------------------
-function initializeHomePage() {
-    // the home page buttons link directly to other pages via href in the html
-    // so there's no extra javascript setup needed here
+// home page & sign up page logic
+function initializeHomePage() { 
+    // nothing needed here yet since the home page just uses html links
 }
 
-// -- goals page -------------------------------------------------------------------
-// sets up everything the goals page needs when it loads
+function initializeSignUpPage() {
+    // listen for the profile form being submitted
+    document.getElementById("signupForm")?.addEventListener("submit", function(event) {
+        // stop the page from refreshing when we hit submit
+        event.preventDefault();
 
-   function initializeGoalsPage() {
-    setupStarRatings();
+        // grab the values the user typed in
+        let name = document.getElementById("name").value;
+        let age = document.getElementById("age").value;
+        let aboutMe = document.getElementById("aboutMe").value;
+
+        // bundle them into an object and save it to local storage
+        let userProfile = { name, age, aboutMe };
+        localStorage.setItem("userProfile", JSON.stringify(userProfile));
+
+        // show a nice bootstrap success banner on the screen
+        const messageDiv = document.getElementById("message");
+        messageDiv.innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                profile created successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    });
+}
+
+// goals page logic
+function initializeGoalsPage() {
+    // draw the goals onto the screen right away
     renderGoals();
 
-    document.getElementById('goal-form').addEventListener('submit', function (e) {
+    // listen for the new/edit goal form being submitted
+    document.getElementById('goal-form')?.addEventListener('submit', function (e) {
+        // stop the page from refreshing
         e.preventDefault();
 
-        const goalId = document.getElementById('goal-id').value;
+        // grab all the values from the form inputs
+        const goalId = parseInt(document.getElementById('goal-id').value);
         const goalName = document.getElementById('goal-name').value;
         const goalTarget = parseInt(document.getElementById('goal-target').value);
         const goalCurrent = parseInt(document.getElementById('goal-current').value);
 
-        // Validate inputs
-        if (isNaN(goalTarget) || goalTarget < 0 || goalTarget > 1000) {
-            alert('Goal target must be between 0 and 1000.');
-            return;
-        }
-
-        if (isNaN(goalCurrent) || goalCurrent < 0 || goalCurrent > goalTarget) {
-            alert(`Current progress must be between 0 and the goal target (${goalTarget}).`);
-            return;
-        }
-
+        // if there is an id, it means we are editing an existing goal
         if (goalId) {
-            // Editing existing goal
             const goalIndex = goals.findIndex(g => g.id == goalId);
             if (goalIndex !== -1) {
-                goals[goalIndex] = {
-                    ...goals[goalIndex],
-                    name: goalName,
-                    target: goalTarget,
-                    current: goalCurrent
-                };
+                // update the existing goal with the new info
+                goals[goalIndex] = { ...goals[goalIndex], name: goalName, target: goalTarget, current: goalCurrent };
             }
         } else {
-            // Adding new goal (goalId is empty)
-            goals.push({
-                id: Date.now(),
-                name: goalName,
-                target: goalTarget,
-                current: goalCurrent,
-                createdAt: new Date().toISOString()
-            });
+            // otherwise, there is no id, so we create a brand new goal object and push it to the array
+            goals.push({ id: Date.now(), name: goalName, target: goalTarget, current: goalCurrent, createdAt: new Date().toISOString() });
         }
 
+        // save to local storage, close the popup, clear the form, and redraw the list
         saveData();
         closeDialog('dialog-new-goal');
         resetGoalForm();
         renderGoals();
     });
 }
-// Delete a goal by ID
+
+// removes a goal from the array after asking the user if they are sure
 function deleteGoal(goalId) {
-    if (confirm('Are you sure you want to delete this goal?')) {
+    if (confirm('are you sure you want to delete this goal?')) {
+        // filter out the goal with the matching id
         goals = goals.filter(g => g.id !== goalId);
         saveData();
         renderGoals();
     }
 }
 
-// draws all goals on the page, splitting them into "active" and "completed"
+// paints the goals onto the screen in either the active or completed sections
 function renderGoals() {
     const activeList = document.getElementById('active-list');
     const completedList = document.getElementById('completed-list');
-
-    // if these elements don't exist, we're not on the goals page -- stop here
     if (!activeList || !completedList) return;
 
-    // clear both lists before redrawing so we don't get duplicates
+    // clear the lists before we redraw them
     activeList.innerHTML = '';
     completedList.innerHTML = '';
 
+    // loop through every goal in our array
     goals.forEach(goal => {
-        // calculate how far along this goal is as a percentage
+        // calculate how far along the goal is as a percentage
         const progress = (goal.current / goal.target) * 100;
         const isCompleted = progress >= 100;
 
-        // create a new div element and fill it with the goal's info
+        // create a new html element for this goal card
         const goalElement = document.createElement('div');
-        goalElement.className = 'goal-item';
+        goalElement.className = 'card mb-3 shadow-sm border-0';
+        
+        // build the inside of the card using bootstrap classes for the progress bar
         goalElement.innerHTML = `
-            <h3>${goal.name}</h3>
-            <p>${goal.current} / ${goal.target} completed</p>
-            <div class="goal-progress-bar">
-                <div class="goal-progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
-            </div>
-            <div class="goal-stats">
-                <span>${Math.round(progress)}%</span>
-                <button onclick="editGoal(${goal.id})">Edit</button>
-                <button onclick="deleteGoal(${goal.id})">Delete</button>
+            <div class="card-body">
+                <h5 class="card-title fw-bold">${goal.name}</h5>
+                <p class="card-text text-muted mb-2">${goal.current} / ${goal.target} completed</p>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar ${isCompleted ? 'bg-success' : 'bg-primary'}" style="width: ${Math.min(progress, 100)}%"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted fw-bold">${Math.round(progress)}%</small>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editGoal(${goal.id})">edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGoal(${goal.id})">delete</button>
+                    </div>
+                </div>
             </div>
         `;
 
-        // put completed goals in the completed section, active goals in the active section
+        // append the card to the correct list based on if it is finished or not
         if (isCompleted) {
             completedList.appendChild(goalElement);
         } else {
@@ -214,46 +231,57 @@ function renderGoals() {
     });
 }
 
-// opens the edit dialog and fills it with the data from the goal being edited
+// populates the goal form with existing data when the user clicks edit
 function editGoal(goalId) {
+    // find the right goal in our array
     const goal = goals.find(g => g.id === goalId);
-    if (!goal) return; // if we can't find the goal, stop
+    if (!goal) return;
 
-    // fill in the form fields with the existing goal data
+    // fill the form inputs with the goal's current details
     document.getElementById('goal-name').value = goal.name;
     document.getElementById('goal-target').value = goal.target;
     document.getElementById('goal-current').value = goal.current;
-    document.getElementById('goal-id').value = goal.id; // hidden field tracks which goal we're editing
-
-    // change the dialog title and button text so the user knows they're editing
-    document.getElementById('goal-dialog-title').textContent = 'Edit Goal';
-    document.getElementById('goal-submit-btn').textContent = 'Update Goal';
-
+    // this hidden id tells the submit function that we are editing, not making a new one
+    document.getElementById('goal-id').value = goal.id;
+    
+    // change the title of the dialog box to say edit instead of start
+    document.getElementById('goal-dialog-title').textContent = 'edit goal';
+    // open the dialog box natively
     document.getElementById('dialog-new-goal').showModal();
 }
 
-// clears all the goal form fields and resets the title/button text back to defaults
+// clears out the goal form so it is fresh for the next time we add one
 function resetGoalForm() {
     document.getElementById('goal-form')?.reset();
     document.getElementById('goal-id').value = '';
-    document.getElementById('goal-dialog-title').textContent = 'Start a New Goal';
-    document.getElementById('goal-submit-btn').textContent = 'Save Goal';
+    document.getElementById('goal-dialog-title').textContent = 'start a new goal';
 }
 
-// -- my books page ----------------------------------------------------------------
-// sets up everything the books page needs when it loads
+// my books page logic
 function initializeBooksPage() {
-    setupTabNavigation(); // make the "completed" / "favorites" tabs work
+    // make sure the star rating widget works on the edit popup
     setupStarRatings();
-    renderBooks(); // draw any books that are already saved
+    // draw all the books onto the screen
+    renderBooks(); 
+
+    // listen for bootstrap tab switches so we can refresh the list if needed
+    document.addEventListener('shown.bs.tab', function (event) {
+        if (event.target.id === 'favorites-tab') {
+            renderFavoriteBooks();
+        } else if (event.target.id === 'completed-tab') {
+            renderCompletedBooks();
+        }
+    });
 
     // listen for the edit book form being submitted
-    document.getElementById('edit-book-form').addEventListener('submit', function (e) {
+    document.getElementById('edit-book-form')?.addEventListener('submit', function (e) {
+        // stop page refresh
         e.preventDefault();
-
+        
+        // grab the id of the book we are editing
         const bookId = parseInt(document.getElementById('edit-book-id').value);
-
-        // build an updated book object with all the new values from the form
+        
+        // build a new book object out of the edited form fields
         const updatedBook = {
             id: bookId,
             title: document.getElementById('edit-title').value,
@@ -262,110 +290,127 @@ function initializeBooksPage() {
             dateFinished: document.getElementById('edit-date').value,
             rating: parseInt(document.getElementById('edit-rating-value').value),
             genre: document.getElementById('edit-genre').value,
-            // keep the original book type (audio/physical) since we don't change it here
+            // we keep the type (audio or physical) the same as it was before
             type: books.find(b => b.id === bookId)?.type || 'physical'
         };
 
-        // find where this book sits in the array and replace it
+        // find exactly where this book lives in our main array
         const bookIndex = books.findIndex(b => b.id === bookId);
         if (bookIndex !== -1) {
+            // overwrite the old book with the new updated book
             books[bookIndex] = updatedBook;
             saveData();
             closeDialog('dialog-edit-book');
-            renderBooks(); // redraw the list with the updated book info
+            renderBooks();
         }
     });
 }
 
-// makes the tab buttons switch between the "completed" and "favorites" sections
-function setupTabNavigation() {
-    const tabs = document.querySelectorAll('.tab');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function () {
-            const tabName = this.getAttribute('data-tab'); // e.g. "completed" or "favorites"
-
-            // remove the active style from all tabs, then add it to the clicked one
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-
-            // hide all book sections, then show only the matching one
-            document.querySelectorAll('.book-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.getElementById(`${tabName}-books`).classList.add('active');
-        });
-    });
-}
-
-// calls both render functions to refresh the full books page
+// helper to draw both tabs at the same time
 function renderBooks() {
     renderCompletedBooks();
     renderFavoriteBooks();
 }
 
-// draws the list of all completed books, sorted newest first
+// paints all completed books onto the screen
 function renderCompletedBooks() {
-    const container = document.getElementById('completed-books');
+    const container = document.getElementById('completed-books-content');
     if (!container) return;
-    container.innerHTML = ''; // clear old content before redrawing
-
-    // sort a copy of books by date finished, newest at the top
-    const sortedBooks = [...books].sort((a, b) => new Date(b.dateFinished) - new Date(a.dateFinished));
-
-    sortedBooks.forEach(book => {
-        const bookElement = document.createElement('div');
-        bookElement.className = 'book-item';
-        bookElement.innerHTML = `
-            <h3>${book.title}</h3>
-            <p>By: ${book.author}</p>
-            <p>Type: ${book.type === 'audio' ? '🎧 Audio' : '📖 Physical'}</p>
-            <p>Length: ${book.length}</p>
-            <p>Date Finished: ${formatDate(book.dateFinished)}</p>
-            <p>Genre: ${book.genre || 'Not specified'}</p>
-            <div class="book-rating">${generateStars(book.rating)}</div>
-            <button onclick="openEditBook(${book.id})" style="margin-top: 0.5rem;">Edit</button>
-        `;
-        container.appendChild(bookElement);
-    });
-}
-
-// draws only the books that have a 5-star rating (user's favorites)
-function renderFavoriteBooks() {
-    const container = document.getElementById('favorite-books');
-    if (!container) return;
+    
+    // clear the container out first
     container.innerHTML = '';
 
-    // filter to only keep 5-star books, then sort newest first
+    // sort the books in chronological order (oldest dates first)
+    const sortedBooks = [...books].sort((a, b) => new Date(a.dateFinished) - new Date(b.dateFinished));
 
-    //LOOK OVER THE FAVORITES (NOT WORKING)
-    const favoriteBooks = books
-        .filter(book => book.rating === 5)
-        .sort((a, b) => new Date(b.dateFinished) - new Date(a.dateFinished));
-
-    favoriteBooks.forEach(book => {
+    // loop over every sorted book and build its html card
+    sortedBooks.forEach(book => {
         const bookElement = document.createElement('div');
-        bookElement.className = 'book-item';
+        bookElement.className = 'book-item card mb-3 shadow-sm border-0'; 
+        
+        // fill the inside of the card with the book's specific data
         bookElement.innerHTML = `
-            <h3>${book.title}</h3>
-            <p>By: ${book.author}</p>
-            <p>Type: ${book.type === 'audio' ? '🎧 Audio' : '📖 Physical'}</p>
-            <p>Length: ${book.length}</p>
-            <p>Date Finished: ${formatDate(book.dateFinished)}</p>
-            <p>Genre: ${book.genre || 'Not specified'}</p>
-            <div class="book-rating">${generateStars(book.rating)}</div>
-            <button onclick="openEditBook(${book.id})" style="margin-top: 0.5rem;">Edit</button>
+            <div class="card-body">
+                <h5 class="card-title fw-bold">${book.title}</h5>
+                <p class="card-text text-muted small mb-2">
+                    <strong>by:</strong> ${book.author}<br>
+                    <strong>type:</strong> ${book.type === 'audio' ? '🎧 audio' : '📖 physical'}<br>
+                    <strong>length:</strong> ${book.length}<br>
+                    <strong>date finished:</strong> ${formatDate(book.dateFinished)}<br>
+                    <strong>genre:</strong> ${book.genre || 'not specified'}<br>
+                </p>
+                <div class="mb-3 fw-bold">rating: <span class="text-warning fs-5">${generateStars(book.rating)}</span></div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm flex-grow-1 m-0 fw-bold" onclick="openEditBook(${book.id})">edit</button>
+                    <button class="btn btn-outline-danger btn-sm flex-grow-1 m-0 fw-bold" onclick="deleteBook(${book.id})">delete</button>
+                </div>
+            </div>
+        `;
+        // add the completed card to the webpage
+        container.appendChild(bookElement);
+    });
+}
+
+// paints only the 5-star books onto the favorites tab
+function renderFavoriteBooks() {
+    const container = document.getElementById('favorite-books-content');
+    if (!container) return;
+    
+    container.innerHTML = '';
+
+    // filter the main books array to only keep books that have exactly 5 as their rating
+    const favoriteBooks = books.filter(book => parseInt(book.rating) === 5);
+
+    // if there are no 5-star books, show a friendly empty message
+    if (favoriteBooks.length === 0) {
+        container.innerHTML = '<div class="alert alert-info text-center mt-3">no 5-star rated books yet.</div>';
+        return;
+    }
+
+    // sort the favorite books chronologically
+    const sortedFavorites = [...favoriteBooks].sort((a, b) => new Date(a.dateFinished) - new Date(b.dateFinished));
+
+    // loop over them and build the html cards just like we did for the completed list
+    sortedFavorites.forEach(book => {
+        const bookElement = document.createElement('div');
+        bookElement.className = 'book-item card mb-3 shadow-sm border-0'; 
+        bookElement.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title fw-bold">${book.title}</h5>
+                <p class="card-text text-muted small mb-2">
+                    <strong>by:</strong> ${book.author}<br>
+                    <strong>type:</strong> ${book.type === 'audio' ? '🎧 audio' : '📖 physical'}<br>
+                    <strong>length:</strong> ${book.length}<br>
+                    <strong>date finished:</strong> ${formatDate(book.dateFinished)}<br>
+                    <strong>genre:</strong> ${book.genre || 'not specified'}<br>
+                </p>
+                <div class="mb-3 fw-bold">rating: <span class="text-warning fs-5">${generateStars(book.rating)}</span></div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm flex-grow-1 m-0 fw-bold" onclick="openEditBook(${book.id})">edit</button>
+                </div>
+            </div>
         `;
         container.appendChild(bookElement);
     });
 }
 
-// opens the edit dialog and pre-fills it with the chosen book's current data
-function openEditBook(bookId) {
-    const book = books.find(b => b.id === bookId);
-    if (!book) return;
+// removes a book entirely from the tracker
+function deleteBook(bookId) {
+    if(confirm("are you sure you want to delete this book?")) {
+        // filter out the deleted book by its id
+        books = books.filter(b => b.id !== bookId);
+        saveData();
+        renderBooks();
+    }
+}
 
-    // fill every form field with the book's saved data
+// populates and opens the edit book popup dialog
+function openEditBook(bookId) {
+    // search the array for the book we want to edit
+    const book = books.find(b => b.id === bookId);
+    if(!book) return;
+
+    // plug the book's details into the input fields
     document.getElementById('edit-book-id').value = book.id;
     document.getElementById('edit-title').value = book.title;
     document.getElementById('edit-author').value = book.author;
@@ -374,416 +419,356 @@ function openEditBook(bookId) {
     document.getElementById('edit-genre').value = book.genre || '';
     document.getElementById('edit-rating-value').value = book.rating;
 
-    // update the star visuals to match the book's saved rating
+    // visually update the star rating widget to match the book's current rating
     const stars = document.querySelectorAll('#edit-book-form .star');
     stars.forEach((star, index) => {
-        star.textContent = index < book.rating ? '★' : '☆' | '⯪';
+        star.textContent = index < book.rating ? '★' : '☆';
     });
 
+    // open the popup dialog natively
     document.getElementById('dialog-edit-book').showModal();
 }
 
-// -- add audio form ---------------------------------------------------------------
-// sets up the form for adding a new audio book
-function initializeAudioForm() {
-    setupStarRatings();
-
-    document.getElementById('audio-book-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        // build a new book object from what the user typed
-        const newBook = {
-            id: Date.now(), // unique id based on the current timestamp
-            title: document.getElementById('audio-title').value,
-            author: document.getElementById('audio-author').value,
-            length: document.getElementById('audio-length').value, // stored as "h:mm" text
-            dateFinished: document.getElementById('audio-date').value,
-            rating: parseInt(document.getElementById('audio-rating-value').value),
-            genre: document.getElementById('audio-genre').value,
-            type: 'audio' // tag this book so we know it's an audiobook later
-        };
-
-        books.push(newBook); // add it to the list
-        saveData();
-        window.location.href = 'my-books.html'; // send the user to their book list
-    });
-}
-
-// -- add physical form ------------------------------------------------------------
-// sets up the form for adding a new physical book
+// add physical and audio book logic
 function initializePhysicalForm() {
     setupStarRatings();
-
-    document.getElementById('physical-book-form').addEventListener('submit', function (e) {
+    
+    // listen for the physical book form submission
+    document.getElementById('physical-book-form')?.addEventListener('submit', function (e) {
         e.preventDefault();
-
-        const newBook = {
+        
+        // build a new physical book object and push it into the main array
+        books.push({
             id: Date.now(),
             title: document.getElementById('physical-title').value,
             author: document.getElementById('physical-author').value,
-            // we add " pages" to the number so it reads nicely in the book list
             length: document.getElementById('physical-pages').value + ' pages',
             dateFinished: document.getElementById('physical-date').value,
             rating: parseInt(document.getElementById('physical-rating-value').value),
             genre: document.getElementById('physical-genre').value,
             type: 'physical'
-        };
-
-        books.push(newBook);
+        });
+        
+        // save the array and redirect the user to the my books page
         saveData();
         window.location.href = 'my-books.html';
     });
 }
 
-// -- stats page -------------------------------------------------------------------
-// an array of month names used to build labels for the charts and navigation
-const MONTH_NAMES = ['january','february','march','april','may','june',
-                     'july','august','september','october','november','december'];
+function initializeAudioForm() {
+    setupStarRatings();
+    
+    // listen for the audio book form submission
+    document.getElementById('audio-book-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // build a new audio book object and push it into the main array
+        books.push({
+            id: Date.now(),
+            title: document.getElementById('audio-title').value,
+            author: document.getElementById('audio-author').value,
+            length: document.getElementById('audio-length').value,
+            dateFinished: document.getElementById('audio-date').value,
+            rating: parseInt(document.getElementById('audio-rating-value').value),
+            genre: document.getElementById('audio-genre').value,
+            type: 'audio'
+        });
+        
+        // save the array and redirect the user to the my books page
+        saveData();
+        window.location.href = 'my-books.html';
+    });
+}
 
-// we store chart instances here so we can destroy and rebuild them when the data changes
-// if we didn't destroy them first, charts would stack on top of each other
+// to be read (tbr) page logic
+function initializeTBRPage() {
+    // draw the existing tbr books onto the screen
+    renderTBRBooks();
+
+    // listen for someone adding a new book to their tbr list
+    document.getElementById('add-tbr-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // push a simplified object into the toberead array
+        toBeRead.push({
+            id: Date.now(),
+            title: document.getElementById('add-tbr-title').value,
+            author: document.getElementById('add-tbr-author').value,
+            dateAdded: new Date().toISOString()
+        });
+        
+        // save, clean up the form, close the popup, and redraw the screen
+        saveData(); 
+        document.getElementById('add-tbr-form').reset();
+        document.getElementById('dialog-add-tbr').close();
+        renderTBRBooks(); 
+    });
+
+    // listen for someone editing a tbr book
+    document.getElementById('edit-tbr-form')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // grab the id of the book being edited
+        const tbrId = parseInt(document.getElementById('edit-tbr-id').value);
+        const tbrIndex = toBeRead.findIndex(b => b.id === tbrId);
+
+        // if we found it, overwrite the title and author
+        if (tbrIndex !== -1) {
+            toBeRead[tbrIndex].title = document.getElementById('edit-tbr-title').value;
+            toBeRead[tbrIndex].author = document.getElementById('edit-tbr-author').value;
+            
+            saveData();
+            document.getElementById('dialog-edit-tbr').close();
+            renderTBRBooks(); 
+        }
+    });
+}
+
+// paints the to be read cards onto the webpage
+function renderTBRBooks() {
+    const container = document.getElementById('tbr-list-container');
+    if (!container) return;
+    
+    // clear the container first
+    container.innerHTML = '';
+
+    // show an empty state message if there are no books on the list
+    if (toBeRead.length === 0) {
+        container.innerHTML = '<div class="alert alert-info text-center mt-3">your tbr list is empty. add some books!</div>';
+        return;
+    }
+
+    // sort the tbr list so newest additions are at the top
+    const sortedTBR = [...toBeRead].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+
+    // build the html cards for the tbr list, using the same style as my books
+    sortedTBR.forEach(book => {
+        const bookElement = document.createElement('div');
+        bookElement.className = 'card mb-3 shadow-sm border-0'; 
+        bookElement.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title fw-bold">${book.title}</h5>
+                <p class="card-text text-muted mb-3">
+                    <strong>by:</strong> ${book.author}
+                </p>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm flex-grow-1 m-0 fw-bold" onclick="openEditTBR(${book.id})">edit</button>
+                    <button class="btn btn-outline-danger btn-sm flex-grow-1 m-0 fw-bold" onclick="deleteTBR(${book.id})">delete</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(bookElement);
+    });
+}
+
+// removes a book from the tbr array
+function deleteTBR(tbrId) {
+    if (confirm("are you sure you want to remove this from your tbr list?")) {
+        // filter it out based on the id that was passed in
+        toBeRead = toBeRead.filter(b => b.id !== tbrId);
+        saveData();
+        renderTBRBooks();
+    }
+}
+
+// populates the edit form for a tbr book and opens the dialog
+function openEditTBR(tbrId) {
+    const book = toBeRead.find(b => b.id === tbrId);
+    if (!book) return;
+
+    // plug the book's data into the inputs
+    document.getElementById('edit-tbr-id').value = book.id;
+    document.getElementById('edit-tbr-title').value = book.title;
+    document.getElementById('edit-tbr-author').value = book.author;
+    
+    // open the dialog natively
+    document.getElementById('dialog-edit-tbr').showModal();
+}
+
+// stats page logic
+// constants and setup for the charts and the month navigation
+const MONTH_NAMES = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 let genreChartInstance, formatChartInstance, timelineChartInstance, ratingChartInstance;
-
-// get today's date once so we can reference it throughout the stats logic
 const today = new Date();
+let navYear = today.getFullYear();
+let navMonth = today.getMonth();
+let allTimeMode = true;
 
-// track which month the user is viewing in the stats page
-let navYear  = today.getFullYear();
-let navMonth = today.getMonth(); // 0 = january, 11 = december
-let allTimeMode = true; // when true, we show stats for all books ever, not just one month
-
-// sets up the stats page: hooks up the navigation buttons and draws everything
 function initializeStatsPage() {
-    // when the left arrow is clicked, go back one month
-    document.getElementById('prev-month').addEventListener('click', () => {
+    // left arrow button goes back one month
+    document.getElementById('prev-month')?.addEventListener('click', () => {
         if (allTimeMode) {
-            // if we were in "all time" mode, switch to the current month first
-            allTimeMode = false;
+            allTimeMode = false; // exit all-time view and start on current month
         } else {
             navMonth--;
-            // if month goes below 0 (january), wrap around to december of the previous year
+            // if we roll past january, go back a year to december
             if (navMonth < 0) { navMonth = 11; navYear--; }
         }
+        // redraw all stats based on the new date
         renderStats();
     });
 
-    // when the right arrow is clicked, go forward one month
-    document.getElementById('next-month').addEventListener('click', () => {
+    // right arrow button goes forward one month
+    document.getElementById('next-month')?.addEventListener('click', () => {
         if (!allTimeMode) {
             navMonth++;
-            // if month goes above 11 (december), wrap around to january of the next year
+            // if we roll past december, go forward a year to january
             if (navMonth > 11) { navMonth = 0; navYear++; }
-
-            // if we've gone past the current month, switch back to "all time"
-            if (navYear > today.getFullYear() ||
-               (navYear === today.getFullYear() && navMonth > today.getMonth())) {
+            
+            // if we try to go into the future, force it back into 'all time' mode instead
+            if (navYear > today.getFullYear() || (navYear === today.getFullYear() && navMonth > today.getMonth())) {
                 allTimeMode = true;
             }
         }
+        // redraw all stats
         renderStats();
     });
 
-    renderStats(); // draw the stats right away when the page loads
-
-    // if the user adds a book in another browser tab, re-render stats automatically
+    // draw the stats initially when the page loads
+    renderStats();
+    
+    // listen for changes to local storage in case they added a book in another tab
     window.addEventListener('storage', () => {
         books = JSON.parse(localStorage.getItem('books')) || [];
         renderStats();
     });
 }
 
-// returns a filtered version of the books list based on the current view mode
-// if allTimeMode is true, return all books. otherwise return only books from the selected month
+// helper function that either returns all books, or filters them down to the month we are looking at
 function getFilteredBooks() {
     if (allTimeMode) return books;
-
+    
     return books.filter(b => {
         if (!b.dateFinished) return false;
-        const d = new Date(b.dateFinished);
+        const d = new Date(b.dateFinished + 'T12:00:00');
         return d.getFullYear() === navYear && d.getMonth() === navMonth;
     });
 }
 
-// the main stats render function -- calculates all the numbers and redraws every section
+// recalculates the numbers and repaints the stat blocks
 function renderStats() {
-    // always reload fresh from storage in case anything was added recently
+    // grab fresh books
     books = JSON.parse(localStorage.getItem('books')) || [];
-
-    // update the heading that shows "all time" or the current month name
-    document.getElementById('month-label').textContent =
-        allTimeMode ? 'All Time' : `${MONTH_NAMES[navMonth]} ${navYear}`;
-
+    
+    const monthLabel = document.getElementById('month-label');
+    if (!monthLabel) return;
+    
+    // update the text that says either 'all time' or 'october 2026'
+    monthLabel.textContent = allTimeMode ? 'all time' : `${MONTH_NAMES[navMonth]} ${navYear}`;
+    
+    // get the books relevant to the current view
     const filtered = getFilteredBooks();
 
-    // set up counters to tally up the stats
-    let totalPages = 0;
-    let totalMinutes = 0; // we'll convert this to hours at the end
-    let totalRating = 0;
-    let ratedCount = 0;   // tracks how many books actually have a rating (to calc average)
-    let physCount = 0;    // tracks how many physical books (for average page length)
+    // set up variables to keep track of our running totals
+    let totalPages = 0, totalMinutes = 0, totalRating = 0, ratedCount = 0, physCount = 0, audCount = 0;
 
+    // loop over every relevant book and add to our totals
     filtered.forEach(b => {
-        // add this book's rating to our running total
-        if (b.rating && b.rating > 0) {
-            totalRating += b.rating;
-            ratedCount++;
-        }
-
+        if (b.rating && b.rating > 0) { totalRating += b.rating; ratedCount++; }
+        
         if (b.type === 'physical' && b.length) {
-            // pull the number out of a string like "350 pages"
+            // grab only the numbers from strings like '350 pages'
             const p = parseInt((b.length.match(/\d+/) || [])[0] || 0);
-            if (!isNaN(p)) {
-                totalPages += p;
-                physCount++;
-            }
+            if (!isNaN(p)) { totalPages += p; physCount++; }
+            
         } else if (b.type === 'audio' && b.length) {
-            // audio length is stored as "h:mm", so we split and convert to minutes
+            // handle audio lengths formatted like '12:30' (hours:mins)
             if (b.length.includes(':')) {
                 const [h, m] = b.length.split(':').map(Number);
                 totalMinutes += (h || 0) * 60 + (m || 0);
+            // handle plain decimals like '12.5'
             } else if (!isNaN(parseFloat(b.length))) {
-                // fallback: if it's just a plain number, treat it as hours
                 totalMinutes += parseFloat(b.length) * 60;
             }
+            audCount++;
         }
     });
 
-    // do the final calculations
-    const avgRating  = ratedCount > 0 ? (totalRating / ratedCount).toFixed(2) : '—';
-    const totalHours = (totalMinutes / 60).toFixed(1);
-    const avgLength  = physCount > 0 ? Math.round(totalPages / physCount) + ' pages' : '—';
-
-    // put the calculated numbers into the html elements on the page
+    // inject all calculated totals into the dom
     document.getElementById('total-books').textContent = filtered.length;
-    document.getElementById('total-pages').textContent = totalPages.toLocaleString(); // adds commas e.g. 1,234
-    document.getElementById('total-hours').textContent = totalHours;
-    document.getElementById('avg-rating').textContent  = avgRating;
-    document.getElementById('avg-length').textContent  = avgLength;
-    document.getElementById('avg-time').textContent    = '—'; // needs start-date tracking to calculate
+    document.getElementById('total-pages').textContent = totalPages.toLocaleString();
+    document.getElementById('total-hours').textContent = (totalMinutes / 60).toFixed(1);
+    document.getElementById('avg-rating').textContent = ratedCount > 0 ? (totalRating / ratedCount).toFixed(2) : '—';
+    document.getElementById('avg-length').textContent = physCount > 0 ? Math.round(totalPages / physCount) + ' pages' : '—';
+    document.getElementById('avg-time').textContent = audCount > 0 ? ((totalMinutes / 60) / audCount).toFixed(1) : '-';
 
-    // -- top rated books ----------------------------------------------------------
+    // render the 'highest rated' section
     const topEl = document.getElementById('top-rated-books');
     topEl.innerHTML = '';
-
-    // get up to 5 books with the highest rating
-    const top = [...filtered]
-        .filter(b => b.rating > 0)
-        .sort((a, b) => b.rating - a.rating)
-        .slice(0, 5);
+    
+    // filter to rated books, sort highest to lowest, take the top 5
+    const top = [...filtered].filter(b => b.rating > 0).sort((a, b) => b.rating - a.rating).slice(0, 5);
 
     if (top.length === 0) {
-        topEl.innerHTML = '<p class="no-books-msg">No rated books yet.</p>';
+        topEl.innerHTML = '<p class="no-books-msg text-muted">no rated books yet.</p>';
     } else {
-        // each book gets a different color class for its spine
+        // array of classes that give the book shapes different colors
         const colorClasses = ['book-1','book-2','book-3','book-4','book-5'];
-
+        
         top.forEach((book, i) => {
-            // trim long titles so they fit on the book spine
+            // cut the title short if it is too long to fit on the spine
             const shortTitle = book.title.length > 20 ? book.title.substring(0, 18) + '…' : book.title;
-
             const div = document.createElement('div');
             div.className = 'book-container';
-            div.innerHTML = `
-                <div class="book-shape ${colorClasses[i]}">${shortTitle}</div>
-                <div class="book-rating-badge">${book.rating}.0 ⭐</div>
-            `;
+            div.innerHTML = `<div class="book-shape ${colorClasses[i]}">${shortTitle}</div><div class="book-rating-badge shadow-sm">${book.rating}.0 ⭐</div>`;
             topEl.appendChild(div);
         });
     }
 
-    // redraw all four charts with the fresh data
-    renderGenreChart(filtered);
-    renderFormatChart(filtered);
-    renderTimelineChart();  // timeline always shows all 12 months regardless of filter
-    renderRatingChart(filtered);
+    // trigger the function to redraw all of the chart.js graphs
+    renderCharts(filtered);
 }
 
-// draws a horizontal bar chart showing how many books belong to each genre
-function renderGenreChart(filtered) {
-    // count how many books have each genre
+// draws the four visual charts using chart.js
+function renderCharts(filtered) {
+    // exit if the chart.js library failed to load
+    if(!window.Chart) return; 
+    
+    // 1. genre chart
     const counts = {};
-    filtered.forEach(b => {
-        const g = (b.genre && b.genre.trim()) ? b.genre.trim() : 'Unspecified';
-        counts[g] = (counts[g] || 0) + 1;
-    });
-
-    // sort genres by count (most popular first) and take the top 7
+    // tally up all the genres
+    filtered.forEach(b => { const g = (b.genre && b.genre.trim()) ? b.genre.trim() : 'unspecified'; counts[g] = (counts[g] || 0) + 1; });
+    // sort them from highest to lowest and take the top 7
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7);
-    const labels = sorted.map(e => e[0]);
-    const data   = sorted.map(e => e[1]);
-    const COLORS = ['#748ffc','#3b5bdb','#4ade80','#f59e0b','#ec4899','#06b6d4','#a78bfa'];
-
-    // destroy the old chart first so we can draw a fresh one
-    if (genreChartInstance) genreChartInstance.destroy();
-
-    const ctx = document.getElementById('genre-chart').getContext('2d');
-    genreChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: COLORS.slice(0, data.length),
-                borderRadius: 6,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            indexAxis: 'y', // makes the bars go horizontally instead of vertically
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { stepSize: 1, precision: 0 } },
-                y: { grid: { display: false }, ticks: { font: { size: 10 } } }
-            }
-        }
+    
+    if (genreChartInstance) genreChartInstance.destroy(); // destroy old chart before drawing new one
+    genreChartInstance = new Chart(document.getElementById('genre-chart').getContext('2d'), {
+        type: 'bar', data: { labels: sorted.map(e => e[0]), datasets: [{ data: sorted.map(e => e[1]), backgroundColor: ['#748ffc','#3b5bdb','#4ade80','#f59e0b','#ec4899','#06b6d4','#a78bfa'], borderRadius: 6 }] },
+        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false } } }
     });
-}
 
-// draws a doughnut chart showing the split between physical and audio books
-function renderFormatChart(filtered) {
-    const physical = filtered.filter(b => b.type === 'physical').length;
-    const audio    = filtered.filter(b => b.type === 'audio').length;
-    const total    = physical + audio;
-
-    // helper to calculate a percentage, avoids dividing by zero
-    const pct = n => total > 0 ? Math.round(n / total * 100) : 0;
-
+    // 2. format chart (doughnut)
+    const phys = filtered.filter(b => b.type === 'physical').length, aud = filtered.filter(b => b.type === 'audio').length;
     if (formatChartInstance) formatChartInstance.destroy();
-
-    const ctx = document.getElementById('format-chart').getContext('2d');
-    formatChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: [`📖 Physical (${pct(physical)}%)`, `🎧 Audio (${pct(audio)}%)`],
-            datasets: [{
-                // we use 0.001 instead of 0 so the chart doesn't break when a segment is empty
-                data: [physical || 0.001, audio || 0.001],
-                backgroundColor: ['#3b5bdb','#f59e0b'],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            cutout: '60%', // controls the size of the hole in the middle
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } }
-            }
-        }
+    formatChartInstance = new Chart(document.getElementById('format-chart').getContext('2d'), {
+        type: 'doughnut', data: { labels: ['📖 physical', '🎧 audio'], datasets: [{ data: [phys || 0.001, aud || 0.001], backgroundColor: ['#3b5bdb','#f59e0b'], borderWidth: 0 }] },
+        options: { responsive: true, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
     });
-}
 
-// draws a line chart showing how many books were finished each month for the last 12 months
-// this chart always uses all books (not the month filter) so the full trend is always visible
-function renderTimelineChart() {
-    // build an array of the last 12 months, going from oldest to newest
+    // 3. timeline chart (line graph)
     const months = [];
+    // generate an array of the last 12 months going backwards from today
     for (let i = 11; i >= 0; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        months.push({
-            label: MONTH_NAMES[d.getMonth()].slice(0, 3) + ' ' + d.getFullYear(),
-            year: d.getFullYear(),
-            month: d.getMonth()
-        });
+        months.push({ label: MONTH_NAMES[d.getMonth()].slice(0, 3) + ' ' + d.getFullYear(), y: d.getFullYear(), m: d.getMonth() });
     }
-
-    // for each month, count how many books were finished during it
-    const counts = months.map(m =>
-        books.filter(b => {
-            if (!b.dateFinished) return false;
-            const d = new Date(b.dateFinished);
-            return d.getFullYear() === m.year && d.getMonth() === m.month;
-        }).length
-    );
-
+    // count how many books were finished in each of those specific months
+    const timelineData = months.map(m => books.filter(b => { if (!b.dateFinished) return false; const d = new Date(b.dateFinished + 'T12:00:00'); return d.getFullYear() === m.y && d.getMonth() === m.m; }).length);
+    
     if (timelineChartInstance) timelineChartInstance.destroy();
-
-    const ctx = document.getElementById('timeline-chart').getContext('2d');
-    timelineChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months.map(m => m.label),
-            datasets: [{
-                label: 'books finished',
-                data: counts,
-                borderColor: '#3b5bdb',
-                backgroundColor: 'rgba(116,143,252,0.15)', // light fill under the line
-                pointBackgroundColor: '#3b5bdb',
-                pointRadius: 4,
-                tension: 0.35, // makes the line slightly curved instead of jagged
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } },
-                y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0 } }
-            }
-        }
+    timelineChartInstance = new Chart(document.getElementById('timeline-chart').getContext('2d'), {
+        type: 'line', data: { labels: months.map(m => m.label), datasets: [{ data: timelineData, borderColor: '#3b5bdb', backgroundColor: 'rgba(59,91,219,0.1)', fill: true, tension: 0.3 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { stepSize: 1 } } } }
     });
-}
 
-// draws a bar chart showing how many books received each star rating (1 through 5)
-function renderRatingChart(filtered) {
-    // dist is an array of 5 zeroes -- index 0 = 1-star books, index 4 = 5-star books
+    // 4. rating distribution chart (bar graph)
     const dist = [0, 0, 0, 0, 0];
-    filtered.forEach(b => {
-        if (b.rating >= 1 && b.rating <= 5) {
-            dist[b.rating - 1]++; // subtract 1 because arrays start at index 0
-        }
-    });
-
+    // tally up how many 1 star, 2 star, etc. books there are
+    filtered.forEach(b => { if (b.rating >= 1 && b.rating <= 5) dist[b.rating - 1]++; });
+    
     if (ratingChartInstance) ratingChartInstance.destroy();
-
-    const ctx = document.getElementById('rating-chart').getContext('2d');
-    ratingChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'],
-            datasets: [{
-                data: dist,
-                // colors go from red (low rating) to blue (high rating)
-                backgroundColor: ['#f87171','#fb923c','#fbbf24','#4ade80','#3b5bdb'],
-                borderRadius: 6,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0 } }
-            }
-        }
+    ratingChartInstance = new Chart(document.getElementById('rating-chart').getContext('2d'), {
+        type: 'bar', data: { labels: ['★','★★','★★★','★★★★','★★★★★'], datasets: [{ data: dist, backgroundColor: ['#f87171','#fb923c','#fbbf24','#4ade80','#3b5bdb'], borderRadius: 6 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { stepSize: 1 } } } }
     });
 }
-// -- sign up page -------------------------------------------------------------------
-// where the profile information collected from the form is placed, creating a profile
-document.getElementById("signupForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    let name = document.getElementById("name").value;
-    let age = document.getElementById("age").value;
-    let aboutMe = document.getElementById("aboutMe").value;
-
-    // Create user profile object
-    let userProfile = {
-        name: name,
-        age: age,
-        aboutMe: aboutMe
-    };
-
-    // Save to localStorage
-    localStorage.setItem("userProfile", JSON.stringify(userProfile));
-
-    document.getElementById("message").textContent = "Profile created successfully!";
-});
-// I don't know how right this is! will need to test - CJ 
-// -- To Be Read page -------------------------------------------------------------------
-let toBeRead = JSON.parse(localStorage.getItem('toBeRead'))||[];
-
-
